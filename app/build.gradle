@@ -11,9 +11,10 @@ plugins {
 
 sonarqube {
     properties {
-        property "sonar.projectKey", "lat-02-mobile_lat02-routes-android"
-        property "sonar.organization", "lat-02-mobile"
+        property "sonar.projectKey", "YawarValerianoSalinas_lat02-routes-android"
+        property "sonar.organization", "yawarvalerianosalinas"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.coverage.jacoco.xmlReportPaths", "app/build/reports/jacoco/testReleaseUnitTestCoverage/testReleaseUnitTestCoverage.xml"
     }
 }
 apply from: "$project.rootDir/jacoco.gradle"
