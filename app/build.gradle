@@ -9,47 +9,16 @@ plugins {
     id 'androidx.navigation.safeargs.kotlin'
 }
 
-apply plugin: 'jacoco'
-
-jacoco {
-    toolVersion = "0.8.8"
-    reportsDirectory.set(layout.buildDirectory.dir("jacoco"))
-}
-
-tasks.withType(Test) {
-    jacoco.includeNoLocationClasses = true
-    jacoco.excludes = ['jdk.internal.*']
-}
-
-task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
-    group = "Reporting"
-    description = "Generate Jacoco coverage reports"
-    reports {
-        xml {
-            enabled true
-            destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
-        }
-        html.required = true
-    }
-
-    def fileFilter = []
-    def mainSrc = "${project.projectDir}/src/main/java"
-    def kotlinTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debugUnitTest", excludes: fileFilter)
-
-    sourceDirectories.setFrom(files([mainSrc]))
-    classDirectories.setFrom(files([kotlinTree]))
-    executionData.setFrom(fileTree(dir: "$project.projectDir",
-            includes: ['**/*.exec', '**/*.ec']
-    ))
-}
-
 sonarqube {
     properties {
         property "sonar.projectKey", "YawarValerianoSalinas_lat02-routes-android"
         property "sonar.organization", "yawarvalerianosalinas"
         property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.language", "kotlin"
+        property "sonar.sources", "src/main/"
     }
 }
+apply from: '../jacoco.gradle'
 
 android {
     compileSdk 32
@@ -65,12 +34,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            testCoverageEnabled true
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-        debug {
-            testCoverageEnabled true
         }
     }
 
