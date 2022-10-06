@@ -11,6 +11,16 @@ plugins {
 
 apply plugin: 'jacoco'
 
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory.set(layout.buildDirectory.dir("jacoco"))
+}
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
 task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports"
@@ -18,6 +28,16 @@ task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
         xml.required = true
         html.required = true
     }
+
+    def fileFilter = []
+    def mainSrc = "${project.projectDir}/src/main/java"
+    def kotlinTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debugUnitTest", excludes: fileFilter)
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([kotlinTree]))
+    executionData.setFrom(fileTree(dir: "$project.projectDir",
+            includes: ['**/*.exec', '**/*.ec']
+    ))
 }
 
 sonarqube {
