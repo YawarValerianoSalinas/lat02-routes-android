@@ -8,17 +8,36 @@ plugins {
     id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
     id 'androidx.navigation.safeargs.kotlin'
 }
+apply plugin: 'jacoco'
 
-sonarqube {
-    properties {
-        property "sonar.projectKey", "YawarValerianoSalinas_lat02-routes-android"
-        property "sonar.organization", "yawarvalerianosalinas"
-        property "sonar.host.url", "https://sonarcloud.io"
-        property "sonar.language", "kotlin"
-        property "sonar.sources", "src/main/"
-    }
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory.set(layout.buildDirectory.dir("jacoco"))
 }
-apply from: '../jacoco.gradle'
+
+tasks.withType(Test) {
+    jacoco.includeNoLocationClasses = true
+    jacoco.excludes = ['jdk.internal.*']
+}
+
+task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
+    group = "Reporting"
+    description = "Generate Jacoco coverage reports"
+    reports {
+        xml.required = true
+        html.required = true
+    }
+
+    def fileFilter = []
+    def mainSrc = "${project.projectDir}/src/main/java"
+    def kotlinTree = fileTree(dir: "$project.buildDir/tmp/kotlin-classes/debugUnitTest", excludes: fileFilter)
+
+    sourceDirectories.setFrom(files([mainSrc]))
+    classDirectories.setFrom(files([kotlinTree]))
+    executionData.setFrom(fileTree(dir: "$project.projectDir",
+            includes: ['**/*.exec', '**/*.ec']
+    ))
+}
 
 android {
     compileSdk 32
