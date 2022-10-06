@@ -25,7 +25,10 @@ task jacocoTestReport(type: JacocoReport, dependsOn: "testDebugUnitTest") {
     group = "Reporting"
     description = "Generate Jacoco coverage reports"
     reports {
-        xml.required = true
+        xml {
+            enabled true
+            destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+        }
         html.required = true
     }
 
