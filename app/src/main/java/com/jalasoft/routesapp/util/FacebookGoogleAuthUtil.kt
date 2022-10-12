@@ -24,7 +24,6 @@ object FacebookGoogleAuthUtil {
     private const val FB_EMAIL = "email"
     private const val FB_NAME = "name"
 
-    // Google config
     fun googleConfiguration(context: Context): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(context.getString(R.string.default_web_client_id))
@@ -33,16 +32,6 @@ object FacebookGoogleAuthUtil {
         return GoogleSignIn.getClient(context, gso)
     }
 
-    fun handleGoogleResults(task: Task<GoogleSignInAccount>, signInClient: GoogleSignInClient, onCompleteListener: (displayName: String, email: String, userTypeLogin: UserTypeLogin, credential: AuthCredential) -> Unit) {
-        val account: GoogleSignInAccount? = task.result
-        if (account != null) {
-            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-            signInClient.signOut()
-            onCompleteListener(account.displayName.toString(), account.email.toString(), UserTypeLogin.GOOGLE, credential)
-        }
-    }
-
-    // Facebook config
     fun facebookConfiguration(callbackManager: CallbackManager, fbLoginManager: LoginManager, onCompleteListener: (displayName: String, email: String, userTypeLogin: UserTypeLogin, credential: AuthCredential) -> Unit) {
         fbLoginManager.registerCallback(
             callbackManager,
@@ -54,20 +43,20 @@ object FacebookGoogleAuthUtil {
                     }
                 }
                 override fun onCancel() {
-                    logOutFromFacebook()
                     Log.d("Facebook", "facebook:onCancel")
                 }
                 override fun onError(error: FacebookException) {
-                    logOutFromFacebook()
                     Log.d("Facebook", "facebook:onError", error)
                 }
             }
         )
     }
 
-    private fun logOutFromFacebook() {
-        if (AccessToken.getCurrentAccessToken() != null) {
-            LoginManager.getInstance().logOut()
+    fun handleGoogleResults(task: Task<GoogleSignInAccount>, onCompleteListener: (displayName: String, email: String, userTypeLogin: UserTypeLogin, credential: AuthCredential) -> Unit) {
+        val account: GoogleSignInAccount? = task.result
+        if (account != null) {
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            onCompleteListener(account.displayName.toString(), account.email.toString(), UserTypeLogin.GOOGLE, credential)
         }
     }
 
@@ -77,7 +66,6 @@ object FacebookGoogleAuthUtil {
                 try {
                     val name = obj.getString(FB_NAME)
                     val email = obj.getString(FB_EMAIL)
-                    logOutFromFacebook()
                     onCompleteListener(name, email)
                 } catch (e: JSONException) {
                     e.printStackTrace()

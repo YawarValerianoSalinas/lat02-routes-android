@@ -76,18 +76,32 @@ def setupAndroidReporting() {
 
                 def javaTree = fileTree(dir: "${project.buildDir}/intermediates/javac/$sourceName/classes", excludes: fileFilter)
                 def kotlinTree = fileTree(dir: "${project.buildDir}/tmp/kotlin-classes/$sourceName", excludes: fileFilter)
-                sourceDirectories.setFrom(files([javaTree]))
-                classDirectories.setFrom(files([kotlinTree]))
-                executionData.setFrom(fileTree(dir: "$project.projectDir",
-                        includes: ['**/*.exec', '**/*.ec']
-                ))
+                classDirectories.from = files([javaTree], [kotlinTree])
+                executionData.from = files("${project.buildDir}/jacoco/${testTaskName}.exec")
+                def coverageSourceDirs = ["src/main/java",
+                                          "src/$productFlavorName/java",
+                                          "src/$buildTypeName/java"]
+
+                sourceDirectories.setFrom(files(coverageSourceDirs))
+                additionalSourceDirs.setFrom(files(coverageSourceDirs))
+
                 reports {
-                    xml {
+                    csv.enabled false // change if needed
+                    xml.enabled true // change if needed
+                    html {
                         enabled true
+                        destination file("${buildDir}/coverage-report")
                     }
-                    html.enabled true
                 }
             }
+        }
+    }
+}
+
+android {
+    buildTypes {
+        debug {
+            testCoverageEnabled true
         }
     }
 }
