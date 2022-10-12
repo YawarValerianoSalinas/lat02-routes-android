@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -19,9 +18,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.jalasoft.routesapp.MainActivity
 import com.google.firebase.auth.AuthCredential
-import com.google.firebase.auth.FirebaseAuth
 import com.jalasoft.routesapp.R
-import com.jalasoft.routesapp.RoutesAppApplication
 import com.jalasoft.routesapp.databinding.FragmentRegisterUserBinding
 import com.jalasoft.routesapp.ui.auth.registerUser.viewModel.RegisterUserViewModel
 import com.jalasoft.routesapp.util.FacebookGoogleAuthUtil
@@ -110,15 +107,9 @@ class RegisterUserFragment : Fragment() {
         }
         val googleAndFacebookObserver = Observer<Boolean> { value ->
             if (value) {
-                val phoneNumber = FirebaseAuth.getInstance().currentUser?.phoneNumber
-                if (phoneNumber == null) {
-                    findNavController().navigate(R.id.action_loginFragment_to_phoneAuthenticationFragment)
-                } else {
-                    val intent = Intent(activity, MainActivity::class.java)
-                    activity?.startActivity(intent)
-                    activity?.finish()
-                    Toast.makeText(context, RoutesAppApplication.resource?.getString(R.string.login_success).toString(), Toast.LENGTH_SHORT).show()
-                }
+                val intent = Intent(activity, MainActivity::class.java)
+                activity?.startActivity(intent)
+                activity?.finish()
             }
         }
         viewModel.errorMessage.observe(this, errorObserver)
@@ -145,7 +136,7 @@ class RegisterUserFragment : Fragment() {
             result ->
         if (result.resultCode == Activity.RESULT_OK) {
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            FacebookGoogleAuthUtil.handleGoogleResults(task, googleSingInClient) { displayName, email, userTypeLogin, credential ->
+            FacebookGoogleAuthUtil.handleGoogleResults(task) { displayName, email, userTypeLogin, credential ->
                 updateUI(displayName, email, userTypeLogin, credential)
             }
         }

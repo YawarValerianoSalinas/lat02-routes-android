@@ -9,8 +9,8 @@ import com.jalasoft.routesapp.util.Response
 
 class FakeDirectionsManager : DirectionsRepository {
     override suspend fun getDirections(
-        startLocation: StartLocation,
-        endLocation: EndLocation
+        startPoint: StartLocation,
+        endPoint: EndLocation
     ): Response<List<Route>> {
         return Response.Success(
             listOf(
